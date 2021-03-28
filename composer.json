@@ -24,13 +24,13 @@
   },
   "autoload": {
     "psr-4": {
-      "OrangeShadow\\Polls\\": "src/"
+      "OrangeShadow\\ElasticFilter\\": "src/"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "OrangeShadow\\ElasitFilter\\ServiceProvider"
+        "OrangeShadow\\ElasticFilter\\ServiceProvider"
       ],
       "aliases": {
       }
