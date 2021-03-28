@@ -1,3 +1,7 @@
+###Install
+
+```composer require orangeshadow/elasitcfilter```
+
 1. ```php artisan vendor:publish```
 
 2. Fill all fields in file:
