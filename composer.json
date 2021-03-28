@@ -1,0 +1,40 @@
+{
+  "name": "orangeshadow/elasitcfilter",
+  "description": "Indexing data for aggregation and search by simple comparisons.",
+  "keywords": [
+    "laravel",
+    "elasticsearch",
+    "filtering"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Anton Alexeev",
+      "email": "alexeev.sker@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.3|^8.0",
+    "illuminate/support": "6.*|7.*|8.*",
+    "elasticsearch/elasticsearch": "^7.0",
+    "ongr/elasticsearch-dsl": "^7.2"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-latest"
+  },
+  "autoload": {
+    "psr-4": {
+      "OrangeShadow\\Polls\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "OrangeShadow\\ElasitFilter\\ServiceProvider"
+      ],
+      "aliases": {
+      }
+    }
+  },
+  "minimum-stability": "dev"
+}
