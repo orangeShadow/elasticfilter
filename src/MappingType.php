@@ -43,7 +43,6 @@ class MappingType
         'type' => 'float'
     ];
 
-
     public const KEYWORD = [
         'type' => 'keyword',
     ];

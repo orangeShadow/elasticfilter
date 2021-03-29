@@ -281,7 +281,7 @@ class IndexConfig
                 $this->filteredFields[] = $this->createNestedString($parentKey, $key);
             }
 
-            if ($item !== MappingType::FILTERED_NESTED && strtolower($item['type']) === 'nested') {
+            if ($this->checkOnNested($item)) {
 
                 $this->findNestedKey($this->createNestedString($parentKey, $key), $item['properties']);
                 continue;
@@ -313,5 +313,15 @@ class IndexConfig
     public function getNestedFields(): array
     {
         return $this->nestedFields;
+    }
+
+    /**
+     * @param array $item
+     **/
+    public function checkOnNested(array $item):bool
+    {
+        return $item !== MappingType::FILTERED_NESTED
+            && isset($item['type'])
+            && strtolower($item['type']) === 'nested';
     }
 }

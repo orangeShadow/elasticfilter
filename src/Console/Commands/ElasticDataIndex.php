@@ -54,6 +54,9 @@ class ElasticDataIndex extends Command
             $mapping = $indexConfig->getMapping();
             foreach ($indexConfig->getClassName()::getDataForElastic() as $item) {
                 foreach ($item as $code => &$value) {
+                    if (!isset($value['value']) || !isset($value['slug'])) {
+                        continue;
+                    }
                     if (isset($mapping[$code]) && $mapping[ $code ] === MappingType::FILTERED_NESTED) {
                         $value['computed'] = implode('||', [$value['value'], $value['slug']]);
                     }
