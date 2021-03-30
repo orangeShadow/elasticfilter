@@ -334,7 +334,6 @@ class ElasticManager
         $body['_source'] = $searchProperty->getSource();
 
         $body = array_merge($body, $this->searchBuilder->build($searchProperty->getQueryParams()));
-        dump($body);
         $result = $this->client->search([
             'index' => $this->config->getName(),
             'body'  => $body
