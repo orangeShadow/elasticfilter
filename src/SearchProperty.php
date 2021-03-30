@@ -37,7 +37,7 @@ class SearchProperty
      *
      * @var array $sort
      */
-    private $sort;
+    private $sort = [];
 
     /**
      * @var array $queryParams
