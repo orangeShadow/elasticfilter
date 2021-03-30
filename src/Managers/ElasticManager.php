@@ -113,7 +113,6 @@ class ElasticManager
         return $this;
     }
 
-
     /**
      * @return IndexConfig
      */
@@ -199,7 +198,6 @@ class ElasticManager
         ];
 
         $this->client->indices()->updateAliases($params);
-
     }
 
     /**
