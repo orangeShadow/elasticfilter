@@ -6,36 +6,95 @@ namespace OrangeShadow\ElasticFilter\Builder;
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\FilterAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\NestedAggregation;
-use ONGR\ElasticsearchDSL\Aggregation\Bucketing\ReverseNestedAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\TermsAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Metric\MaxAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Metric\MinAggregation;
 use ONGR\ElasticsearchDSL\Search;
+use OrangeShadow\ElasticFilter\MappingType;
 
 class AggregationBuilder extends AbstractAggregationBuilder
 {
     /**
      * @param array $queryParams
-     * @param string $url ''
+     * @param string | null $url
+     * @param array $filterFields
      * @return array
      */
-//    public function build(array $queryParams, string $url = ''): array
-//    {
-//        if (!empty($url)) {
-//            $this->getElasticFilter($url);
-//        }
-//
-//        $search = new Search();
-//        $search->addQuery($this->getBoolQuery($queryParams));
-//
-//        return $search->toArray();
-//    }
+    public function build(array $queryParams, ?string $url = null, array $filterFields = []): array
+    {
+        $filterFields = $this->getFields($url, $filterFields);
+
+        $search = new Search();
+
+        foreach ($filterFields as $fieldKey) {
+
+            $aggs = $this->getAggs($fieldKey);
+
+            $filterAggs = new FilterAggregation($fieldKey, $this->searchBuilder->getBoolQuery($queryParams));
+
+            foreach ($aggs as $agg) {
+                $filterAggs->addAggregation($agg);
+            }
+
+            $search->addAggregation($filterAggs);
+        }
+
+        return [
+            "aggs" => [
+                "all_products" => array_merge(["global" => new \stdClass], $search->toArray())
+            ]
+        ];
+    }
+
+    /**
+     * @param string $fieldKey
+     * @return array
+     */
+    protected function getAggs(string $fieldKey): array
+    {
+        if (in_array($fieldKey, $this->getConfig()->getNestedFields(), true)) {
+            $mapping = $this->getConfig()->getMapping();
+            $keys = explode('.', $fieldKey);
+            $firstKey = array_shift($keys);
+
+            if (!isset($mapping[ $firstKey ])) {
+                return [];
+            }
+
+            return [
+                $fieldKey => $this->getNestedAggregation($fieldKey, $firstKey, $mapping[ $firstKey ], $keys)
+            ];
+        }
+
+        $mapping = $this->getConfig()->getFields();
+
+        if (!isset($mapping[ $fieldKey ])) {
+            return [];
+        }
+
+        return $this->prepareAggregateType($fieldKey, $mapping[ $fieldKey ]);
+    }
+
+    /**
+     * @param string|null $url
+     * @param array $filterFields
+     * @return array
+     */
+    protected function getFields(?string $url, array $filterFields): array
+    {
+        $result = [];
+        if (!is_null($url)) {
+            $result = $this->getFieldsByUrl($url);
+        }
+
+        return array_merge($result, $filterFields);
+    }
 
     /**
      * @param string $url
      * @return array
      */
-    protected function getElasticFilter(string $url): array
+    protected function getFieldsByUrl(string $url): array
     {
         $filterList = $this->elasticFilterRepository->search([
             'url'   => $url,
@@ -51,105 +110,17 @@ class AggregationBuilder extends AbstractAggregationBuilder
         return $filterFields;
     }
 
-    /**
-     * @param array $queryParams
-     *
-     * @return array
-     */
-    public function build(array $queryParams): array
-    {
-        $search = new Search();
-
-        /**
-         * @var IndexMappingElement $item
-         */
-        foreach ($this->filterFields as $key => $type) {
-            if ($item->getBitrixIblockId() === $this->config->getOfferIBlockId()) {
-                $aggs = $this->prepareOfferAggregateType($item, $queryParams);
-            } else {
-                $aggs = $this->prepareAggregateType($item);
-            }
-
-
-            /**
-             * @var AbstractAggregation $agg
-             */
-            foreach ($aggs as $keyName => $agg) {
-                $curQueryParams = $queryParams;
-
-                //Исключаем из фильтрации при группировке фильтр по этому полю
-                if (isset($curQueryParams[ $item->getName() ])) {
-                    unset($curQueryParams[ $item->getName() ]);
-                } else {
-                    unset($curQueryParams[ $item->getName() . '_to' ]);
-                    unset($curQueryParams[ $item->getName() . '_from' ]);
-                }
-
-                if ($item->getBitrixIblockId() === $this->config->getOfferIBlockId()) {
-                    unset($curQueryParams[ 'offers_' . $item->getName() ]);
-                }
-
-                $filterAggs = new FilterAggregation($keyName, $this->searchBuilder->getBoolQuery($curQueryParams));
-                $filterAggs->addAggregation($agg);
-                $search->addAggregation($filterAggs);
-            }
-        }
-
-        return [
-            "aggs" => [
-                "all_products" => array_merge(["global" => new \stdClass], $search->toArray())
-            ]
-        ];
-    }
 
     /**
-     * @param Mapable $element
-     * @param array $curQueryParams
-     */
-    protected function prepareOfferAggregateType(Mapable $element, array $curQueryParams): array
-    {
-        unset($curQueryParams[ 'offers_' . $element->getName() ]);
-        $offerKey = 'offers.' . $element->getName();
-
-        $aggs = new NestedAggregation($offerKey, 'offers');
-        $subAggs = new NestedAggregation($offerKey, $offerKey);
-
-        $hasInFilter = $element->isHasInFilter();
-        foreach ($element->getProperties() as $item) {
-            if ($hasInFilter && $item->getName()!=='computed') {
-                continue;
-            }
-
-            $sumKey = $offerKey . "." . $item->getName();
-            foreach ($this->prepareAggregateType($item, $sumKey) as $agg) {
-                /**
-                 * TODO:
-                 * Добавляем хак для подсчета кол-ва остатков в магазине
-                 */
-                if ($element->getName() === 'noone_stores4filter') {
-                    $agg->addAggregation(new ReverseNestedAggregation('noone_stores4filter_value'));
-                }
-                $subAggs->addAggregation($agg);
-            }
-        }
-        $aggs->addAggregation($subAggs);
-
-        return [$offerKey => $aggs];
-    }
-
-
-    /**
-     * @param Mapable $element
      * @param string|null $key
+     * @param array $type
      * @return array
      */
-    protected function prepareAggregateType(Mapable $element, ?string $key = null): array
+    protected function prepareAggregateType(string $key, array $type): array
     {
-        $key = $key ?? $element->getName();
-
-        switch ($element->getType()) {
-            case TypeEnum::INT:
-            case TypeEnum::FLOAT:
+        switch ($type) {
+            case MappingType::INT:
+            case MappingType::FLOAT:
                 $minAggs = new MinAggregation($key . "_" . self::RANGE_BOTTOM_NAME);
                 $minAggs->setField($key);
                 $maxAggs = new MaxAggregation($key . "_" . self::RANGE_TOP_NAME);
@@ -159,17 +130,11 @@ class AggregationBuilder extends AbstractAggregationBuilder
                     $key . "_" . self::RANGE_BOTTOM_NAME => $minAggs,
                     $key . "_" . self::RANGE_TOP_NAME    => $maxAggs
                 ];
-            case TypeEnum::NESTED:
+            case MappingType::FILTERED_NESTED:
                 $aggs = new NestedAggregation($key, $key);
-                foreach ($element->getProperties() as $item) {
-                    if (in_array($item->getName(), ['title', 'value'], true)) {
-                        continue;
-                    }
-                    $sumKey = $key . "." . $item->getName();
-                    foreach ($this->prepareAggregateType($item, $sumKey) as $agg) {
-                        $aggs->addAggregation($agg);
-                    }
-                }
+                $terms = new TermsAggregation($key, $key . '.computed');
+                $terms->addParameter('size', 1000);
+                $aggs->addAggregation($terms);
 
                 return [$key => $aggs];
             default:
@@ -178,5 +143,26 @@ class AggregationBuilder extends AbstractAggregationBuilder
 
                 return [$key => $terms];
         }
+    }
+
+    /**
+     * @param string $fullKey
+     * @param array $currentKey
+     * @param array $type
+     * @param array $keys
+     * @return AbstractAggregation
+     */
+    protected function getNestedAggregation(string $fullKey, string $currentKey, array $type, array $keys): AbstractAggregation
+    {
+        if ($type === MappingType::FILTERED_NESTED) {
+            return $this->prepareAggregateType($currentKey, $type)[ $currentKey ];
+        }
+        $aggs = new NestedAggregation($fullKey, $currentKey);
+        $key = array_shift($keys);
+        $currentKey = $this->getConfig()->createNestedString($currentKey, $key);
+        $type = $type['properties'][ $key ];
+        $aggs->addAggregation($this->getNestedAggregation($fullKey, $currentKey, $type, $keys));
+
+        return $aggs;
     }
 }

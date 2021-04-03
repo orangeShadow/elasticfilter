@@ -3,10 +3,9 @@ declare(strict_types=1);
 
 namespace OrangeShadow\ElasticFilter\Builder;
 
-use OrangeShadow\ElasticFilter\Contracts\IElasticQueryBuilder;
 use OrangeShadow\ElasticFilter\IndexConfig;
 
-abstract class AbstractSearchBuilder implements IElasticQueryBuilder
+abstract class AbstractSearchBuilder
 {
     /**
      * @var IndexConfig
@@ -25,4 +24,6 @@ abstract class AbstractSearchBuilder implements IElasticQueryBuilder
     {
         return $this->config;
     }
+
+    abstract public function build(array $queryParams): array;
 }

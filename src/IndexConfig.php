@@ -282,7 +282,6 @@ class IndexConfig
             }
 
             if ($this->checkOnNested($item)) {
-
                 $this->findNestedKey($this->createNestedString($parentKey, $key), $item['properties']);
                 continue;
             }

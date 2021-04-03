@@ -53,11 +53,13 @@ class ElasticDataIndex extends Command
             $elasticManager->setAlias($nexIndex);
             $mapping = $indexConfig->getMapping();
             foreach ($indexConfig->getClassName()::getDataForElastic() as $item) {
+
                 foreach ($item as $code => &$value) {
-                    if (!isset($value['value']) || !isset($value['slug'])) {
+                    if (!isset($value['value'], $value['slug'])) {
                         continue;
                     }
-                    if (isset($mapping[$code]) && $mapping[ $code ] === MappingType::FILTERED_NESTED) {
+
+                    if (isset($mapping[ $code ]) && $mapping[ $code ] === MappingType::FILTERED_NESTED) {
                         $value['computed'] = implode('||', [$value['value'], $value['slug']]);
                     }
                 }

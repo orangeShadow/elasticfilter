@@ -10,7 +10,7 @@ use OrangeShadow\ElasticFilter\Builder\AbstractAggregationBuilder;
 use OrangeShadow\ElasticFilter\Builder\AbstractSearchBuilder;
 use OrangeShadow\ElasticFilter\Builder\AggregationBuilder;
 use OrangeShadow\ElasticFilter\Builder\SearchBuilder;
-use OrangeShadow\ElasticFilter\Contracts\IResourceable;
+use OrangeShadow\ElasticFilter\Contracts\IAggregationHandler;
 use OrangeShadow\ElasticFilter\Exceptions\CreateIndexException;
 use OrangeShadow\ElasticFilter\IndexConfig;
 use OrangeShadow\ElasticFilter\SearchProperty;
@@ -52,8 +52,8 @@ class ElasticManager
 
         if (!$client) {
             $elasticIp = \config(self::CONFIG_FILE . '.elastic_ip') ?: env('ELASTIC_IP');
-            $elasticUser = \config(self::CONFIG_FILE . '.elastic_name') ?: env('ELASTIC_NAME','');
-            $elasticPass = \config(self::CONFIG_FILE . '.elastic_password') ?: env('ELASTIC_PASSWORD','');
+            $elasticUser = \config(self::CONFIG_FILE . '.elastic_name') ?: env('ELASTIC_NAME', '');
+            $elasticPass = \config(self::CONFIG_FILE . '.elastic_password') ?: env('ELASTIC_PASSWORD', '');
             $this->client = ClientBuilder::create()
                 ->setHosts([$elasticIp])
                 ->setBasicAuthentication($elasticUser, $elasticPass)
@@ -61,15 +61,15 @@ class ElasticManager
         }
 
         if (\config(self::CONFIG_FILE . '.searchBuilder')) {
-            $searchBuilderClassName = \config(self::CONFIG_FILE.'.searchBuilder');
+            $searchBuilderClassName = \config(self::CONFIG_FILE . '.searchBuilder');
             $this->searchBuilder = new $searchBuilderClassName($config);
         } else {
             $this->searchBuilder = new SearchBuilder($config);
         }
 
         if (\config(self::CONFIG_FILE . '.aggregationBuilder')) {
-            $aggregationBuilderClassName = \config(self::CONFIG_FILE.'.aggregationBuilder');
-            $this->aggregationBuilder = new $aggregationBuilderClassName($config,$this->searchBuilder);
+            $aggregationBuilderClassName = \config(self::CONFIG_FILE . '.aggregationBuilder');
+            $this->aggregationBuilder = new $aggregationBuilderClassName($config, $this->searchBuilder);
         } else {
             $this->aggregationBuilder = new AggregationBuilder($config, $this->searchBuilder);
         }
@@ -347,28 +347,31 @@ class ElasticManager
 
     /**
      * @param array $queryParams
-     * @param string $url
-     * @param IResourceable|null $resource
+     * @param string|null $url
+     * @param array $filterFields = [];
+     * @param IAggregationHandler|null $handler
+     *
      * @return array|callable
      */
-    public function aggregation(array $queryParams, string $url = '', ?IResourceable $resource = null): array
+    public function aggregation(array $queryParams, string $url = null, array $filterFields = [], ?IAggregationHandler $handler = null): array
     {
         $body = array_merge(
             ['size' => 0],
             $this->searchBuilder->build($queryParams),
-            $this->aggregationBuilder->build($queryParams, $url)
+            $this->aggregationBuilder->build($queryParams, $url, $filterFields)
         );
 
-        $results = $this->client->search([
+        $result = $this->client->search([
             'index' => $this->getConfig()->getName(),
             'body'  => $body
         ]);
 
-        if (is_null($resource)) {
-            return $results;
+        if (!is_null($handler)) {
+            return $handler->resultHandler($result);
         }
 
-        return $resource->toArray($results);
+        return $this->aggregationBuilder->resultHandler($result);
+
     }
 
     /**

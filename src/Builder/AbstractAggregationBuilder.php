@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace OrangeShadow\ElasticFilter\Builder;
 
-use OrangeShadow\ElasticFilter\Contracts\IElasticQueryBuilder;
+use OrangeShadow\ElasticFilter\Contracts\IAggregationHandler;
 use OrangeShadow\ElasticFilter\IndexConfig;
 use OrangeShadow\ElasticFilter\Repositories\ElasticFilterRepository;
 
@@ -13,8 +13,11 @@ use OrangeShadow\ElasticFilter\Repositories\ElasticFilterRepository;
  *
  * @package OrangeShadow\ElasticFilter\Builder
  */
-abstract class AbstractAggregationBuilder implements IElasticQueryBuilder
+abstract class AbstractAggregationBuilder implements IAggregationHandler
 {
+    public const RANGE_BOTTOM_NAME = "from";
+    public const RANGE_TOP_NAME = "to";
+
     /**
      * @var IndexConfig
      */
@@ -59,5 +62,67 @@ abstract class AbstractAggregationBuilder implements IElasticQueryBuilder
         $this->config = $config;
         $this->searchBuilder = $searchBuilder;
         $this->elasticFilterRepository = new ElasticFilterRepository();
+    }
+
+
+    /**
+     * @return IndexConfig
+     */
+    public function getConfig(): IndexConfig
+    {
+        return $this->config;
+    }
+
+    /**
+     * @param array $queryParams
+     * @param string|null $url
+     * @param array $filterFields
+     *
+     * @return array
+     */
+    abstract public function build(array $queryParams, ?string $url = null, array $filterFields = []): array;
+
+
+    /**
+     * @param array $result
+     * @return array
+     */
+    public function resultHandler(array $result): array
+    {
+        $data = [];
+        $result = $result['aggregations']['all_products'];
+
+        foreach ($result as $key => $item) {
+            $res = $this->nestedResultWatch($key, $item);
+
+            if (empty($res)) {
+                continue;
+            }
+            $data[ $key ] = $res;
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param $key
+     * @param $item
+     * @return array
+     */
+    protected function nestedResultWatch($key, $item): array
+    {
+        if (isset($item[ $key ])) {
+            return $this->nestedResultWatch($key, $item[ $key ]);
+        }
+
+        if (isset($item['buckets'])) {
+            return $item['buckets'];
+        }
+
+        if (isset($item[$key.'_'.self::RANGE_BOTTOM_NAME],$item[$key.'_'.self::RANGE_TOP_NAME])) {
+            return $item;
+        }
+
+        return [];
     }
 }
