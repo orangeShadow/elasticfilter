@@ -16,14 +16,11 @@ class AggregationBuilder extends AbstractAggregationBuilder
 {
     /**
      * @param array $queryParams
-     * @param string | null $url
      * @param array $filterFields
      * @return array
      */
-    public function build(array $queryParams, ?string $url = null, array $filterFields = []): array
+    public function build(array $queryParams,  array $filterFields): array
     {
-        $filterFields = $this->getFields($url, $filterFields);
-
         $search = new Search();
 
         foreach ($filterFields as $fieldKey) {
@@ -76,42 +73,6 @@ class AggregationBuilder extends AbstractAggregationBuilder
     }
 
     /**
-     * @param string|null $url
-     * @param array $filterFields
-     * @return array
-     */
-    protected function getFields(?string $url, array $filterFields): array
-    {
-        $result = [];
-        if (!is_null($url)) {
-            $result = $this->getFieldsByUrl($url);
-        }
-
-        return array_merge($result, $filterFields);
-    }
-
-    /**
-     * @param string $url
-     * @return array
-     */
-    protected function getFieldsByUrl(string $url): array
-    {
-        $filterList = $this->elasticFilterRepository->search([
-            'url'   => $url,
-            'index' => $this->config->getName()
-        ])->get();
-
-        $filterFields = [];
-
-        foreach ($filterList as $filter) {
-            $filterFields[] = $filter->slug;
-        }
-
-        return $filterFields;
-    }
-
-
-    /**
      * @param string|null $key
      * @param array $type
      * @return array
@@ -147,7 +108,7 @@ class AggregationBuilder extends AbstractAggregationBuilder
 
     /**
      * @param string $fullKey
-     * @param array $currentKey
+     * @param string $currentKey
      * @param array $type
      * @param array $keys
      * @return AbstractAggregation

@@ -347,18 +347,17 @@ class ElasticManager
 
     /**
      * @param array $queryParams
-     * @param string|null $url
      * @param array $filterFields = [];
      * @param IAggregationHandler|null $handler
      *
      * @return array|callable
      */
-    public function aggregation(array $queryParams, string $url = null, array $filterFields = [], ?IAggregationHandler $handler = null): array
+    public function aggregation(array $queryParams, array $filterFields = [], ?IAggregationHandler $handler = null): array
     {
         $body = array_merge(
             ['size' => 0],
             $this->searchBuilder->build($queryParams),
-            $this->aggregationBuilder->build($queryParams, $url, $filterFields)
+            $this->aggregationBuilder->build($queryParams, $filterFields)
         );
 
         $result = $this->client->search([

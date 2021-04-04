@@ -16,14 +16,13 @@ class ElasticFilter extends Model implements IViewType
      * @var string[]
      */
     protected $fillable = [
-        'url',
-        'title',
-        'type',
+        'uri',
         'index',
         'slug',
+        'title',
+        'type',
         'url_slug',
         'sort',
-        'step',
         'unit',
         'hint'
     ];
@@ -57,8 +56,8 @@ class ElasticFilter extends Model implements IViewType
             return $query->where('index', $filter['index']);
         });
 
-        $query->when(isset($filter['url']), function (Builder $query) use ($filter) {
-            return $query->where('url', $filter['url']);
+        $query->when(isset($filter['uri']), function (Builder $query) use ($filter) {
+            return $query->where('uri', $filter['uri']);
         });
 
         $query->when(isset($filter['slug']), function (Builder $query) use ($filter) {

@@ -75,12 +75,11 @@ abstract class AbstractAggregationBuilder implements IAggregationHandler
 
     /**
      * @param array $queryParams
-     * @param string|null $url
      * @param array $filterFields
      *
      * @return array
      */
-    abstract public function build(array $queryParams, ?string $url = null, array $filterFields = []): array;
+    abstract public function build(array $queryParams, array $filterFields ): array;
 
 
     /**

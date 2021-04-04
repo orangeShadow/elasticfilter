@@ -39,9 +39,12 @@ You must return in your data (IElasticImport) special array
 [
     'value' => 'Example title',
     'slug'  => 'slug_for_url',
-    'computed' => {title}||{value},
+    'computed' => {value}||{slug},
 ]
 ```
+
+It's need for printing and filtering data, when value hasn't fit format for url 
+
 
 or you can create object:
 
@@ -65,9 +68,46 @@ $searchProperty->setSort(['id' => 'asc']);
 ElasticManager::search($searchProperty);  //to find elements 
 ElasticManager::count($searchProperty);  //to get element`s count
 
-ElasticManager::aggregation($queryParams,{$url},$filterFields=[])
-
-Where $filterFields you can set manualy in code or you can set $url and then fields will be get from  ElasticFilter  
+ElasticManager::aggregation($queryParams,$filterFields) //filterFields - fields for aggregation
 ```
+
+Where $filterFields you must set manual
+
+For example you can use OrangeShadow\ElasticFilter\Models\ElasticFilter model and
+OrangeShadow\ElasticFilter\Repositories\ElasticFilterRepository
+
+1. Run migrations 
+2. Enter data to ElasticFilter table
+
+```
+    public function __construct() 
+    {
+        $this->elasticFilterRepository = new ElasticFilterRepository();
+        $this->config = new InexConfig('config_file_name');
+    }
+    
+    ...
+    
+    /**
+     * @param string $url
+     * @return array
+     */
+    protected function getFieldsByUrl(string $url): array
+    {
+        $filterList = $this->elasticFilterRepository->search([
+            'uri'   => $uri,
+            'index' => $this->config->getName()
+        ])->get();
+
+        $filterFields = [];
+
+        foreach ($filterList as $filter) {
+            $filterFields[] = $filter->slug;
+        }
+
+        return $filterFields;
+    }
+```
+
 
  
