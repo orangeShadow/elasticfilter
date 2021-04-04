@@ -109,5 +109,23 @@ OrangeShadow\ElasticFilter\Repositories\ElasticFilterRepository
     }
 ```
 
+### Url handler object
 
+```
+$urlHandler = new UrlHandler();
+$res = $urlHandler->parse('/catalog/vino/filter/color-beloe-or-rozovoe/country-avstraliya',['color'=>'offer.color']);
+
+return:
+[
+    "prefix" => "/catalog/vino",
+    "queryParams" => [
+        "offer.color" => ["beloe","rozovoe"]  
+        "country" => ["avstraliya"]
+    ]
+]
+
+$res = $urlHandler->build($res['queryParams'],['offer.color'=>'color']));
+
+return: "filter/color-beloe-or-rozovoe/country-avstraliya"
+```
  
