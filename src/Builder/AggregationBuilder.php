@@ -19,7 +19,7 @@ class AggregationBuilder extends AbstractAggregationBuilder
      * @param array $filterFields
      * @return array
      */
-    public function build(array $queryParams,  array $filterFields): array
+    public function build(array $queryParams, array $filterFields): array
     {
         $search = new Search();
 
@@ -27,13 +27,22 @@ class AggregationBuilder extends AbstractAggregationBuilder
 
             $aggs = $this->getAggs($fieldKey);
 
-            $filterAggs = new FilterAggregation($fieldKey, $this->searchBuilder->getBoolQuery($queryParams));
+            foreach ($aggs as $key => $agg) {
+                $curQueryParams = $queryParams;
 
-            foreach ($aggs as $agg) {
+                //Exclude current field value from agggregation filtering
+                if (isset($curQueryParams[ $key ])) {
+                    unset($curQueryParams[ $key ]);
+                } else {
+                    unset($curQueryParams[ $fieldKey . "_" . self::RANGE_TOP_NAME ],
+                        $curQueryParams[ $fieldKey . "_" . self::RANGE_BOTTOM_NAME ]
+                    );
+                }
+
+                $filterAggs = new FilterAggregation($key, $this->searchBuilder->getBoolQuery($curQueryParams));
                 $filterAggs->addAggregation($agg);
+                $search->addAggregation($filterAggs);
             }
-
-            $search->addAggregation($filterAggs);
         }
 
         return [

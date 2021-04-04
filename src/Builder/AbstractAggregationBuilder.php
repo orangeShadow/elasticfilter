@@ -118,9 +118,11 @@ abstract class AbstractAggregationBuilder implements IAggregationHandler
             return $item['buckets'];
         }
 
-        if (isset($item[$key.'_'.self::RANGE_BOTTOM_NAME],$item[$key.'_'.self::RANGE_TOP_NAME])) {
+        if (isset($item["value"])) {
             return $item;
         }
+
+
 
         return [];
     }
