@@ -79,7 +79,7 @@ abstract class AbstractAggregationBuilder implements IAggregationHandler
      *
      * @return array
      */
-    abstract public function build(array $queryParams, array $filterFields ): array;
+    abstract public function build(array $queryParams, array $filterFields): array;
 
 
     /**
@@ -89,8 +89,7 @@ abstract class AbstractAggregationBuilder implements IAggregationHandler
     public function resultHandler(array $result): array
     {
         $data = [];
-        $result = $result['aggregations']['all_products'];
-
+        $result = $result['aggregations']['all_products'];;
         foreach ($result as $key => $item) {
             $res = $this->nestedResultWatch($key, $item);
 
@@ -122,6 +121,12 @@ abstract class AbstractAggregationBuilder implements IAggregationHandler
             return $item;
         }
 
+        if (isset($item[ $key . '_' . self::RANGE_BOTTOM_NAME ]) && isset($item[ $key . "_" . self::RANGE_TOP_NAME ])) {
+            return [
+                $key . '_' . self::RANGE_BOTTOM_NAME => $item[ $key . '_' . self::RANGE_BOTTOM_NAME ],
+                $key . "_" . self::RANGE_TOP_NAME => $item[ $key . '_' . self::RANGE_TOP_NAME ],
+            ];
+        }
 
 
         return [];

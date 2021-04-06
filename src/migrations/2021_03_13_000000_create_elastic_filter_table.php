@@ -11,7 +11,7 @@ class CreateElasticFilterTable extends Migration
 {
     public function up()
     {
-        Schema::create('elastic_filter', function (Blueprint $table) {
+        Schema::create('elastic_filters', function (Blueprint $table) {
             $table->increments('id');
             $table->string('uri');
             $table->string('index')->comment('Elastic Index name');
@@ -29,6 +29,6 @@ class CreateElasticFilterTable extends Migration
 
     public function down()
     {
-        Schema::drop('elastic_filter');
+        Schema::drop('elastic_filters');
     }
 }

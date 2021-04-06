@@ -64,6 +64,10 @@ class MappingType
         'type' => 'short'
     ];
 
+    public const DATE = [
+        'type' => 'datetime'
+    ];
+
     /**
      * @param string $type
      * @return array

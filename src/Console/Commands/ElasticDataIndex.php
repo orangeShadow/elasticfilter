@@ -51,25 +51,16 @@ class ElasticDataIndex extends Command
             $elasticManager = new ElasticManager($indexConfig);
             $nexIndex = $elasticManager->createIndex();
             $elasticManager->setAlias($nexIndex);
-            $mapping = $indexConfig->getMapping();
             foreach ($indexConfig->getClassName()::getDataForElastic() as $item) {
-
-                foreach ($item as $code => &$value) {
-                    if (!isset($value['value'], $value['slug'])) {
-                        continue;
-                    }
-
-                    if (isset($mapping[ $code ]) && $mapping[ $code ] === MappingType::FILTERED_NESTED) {
-                        $value['computed'] = implode('||', [$value['value'], $value['slug']]);
-                    }
-                }
-
                 $elasticManager->addElement($item[ $indexConfig->getPrimaryKey() ], $item);
             }
 
         } catch (ElasticFilterException $e) {
             $this->error($e->getMessage() . ', file:' . $e->getFile() . ', line:' . $e->getLine());
-            var_dump($e->getPrevious()->getMessage());
+
+            if ($e->getPrevious() !== null) {
+                $this->error($e->getPrevious()->getMessage());
+            }
         }
 
 

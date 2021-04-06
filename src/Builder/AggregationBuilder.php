@@ -91,6 +91,7 @@ class AggregationBuilder extends AbstractAggregationBuilder
         switch ($type) {
             case MappingType::INT:
             case MappingType::FLOAT:
+            case MappingType::SHORT:
                 $minAggs = new MinAggregation($key . "_" . self::RANGE_BOTTOM_NAME);
                 $minAggs->setField($key);
                 $maxAggs = new MaxAggregation($key . "_" . self::RANGE_TOP_NAME);
@@ -120,18 +121,32 @@ class AggregationBuilder extends AbstractAggregationBuilder
      * @param string $currentKey
      * @param array $type
      * @param array $keys
-     * @return AbstractAggregation
+     * @return AbstractAggregation | array
      */
-    protected function getNestedAggregation(string $fullKey, string $currentKey, array $type, array $keys): AbstractAggregation
+    protected function getNestedAggregation(string $fullKey, string $currentKey, array $type, array $keys)
     {
         if ($type === MappingType::FILTERED_NESTED) {
-            return $this->prepareAggregateType($currentKey, $type)[ $currentKey ];
+            return $this->prepareAggregateType($currentKey, $type);
         }
+
+        if ($type['type'] !== 'nested') {
+            return $this->prepareAggregateType($currentKey, $type);
+        }
+
         $aggs = new NestedAggregation($fullKey, $currentKey);
         $key = array_shift($keys);
         $currentKey = $this->getConfig()->createNestedString($currentKey, $key);
         $type = $type['properties'][ $key ];
-        $aggs->addAggregation($this->getNestedAggregation($fullKey, $currentKey, $type, $keys));
+
+        $result = $this->getNestedAggregation($fullKey, $currentKey, $type, $keys);
+
+        if(is_array($result)) {
+            foreach ($result as $agg) {
+                $aggs->addAggregation($agg);
+            }
+        } else {
+            $aggs->addAggregation($result);
+        }
 
         return $aggs;
     }
