@@ -121,7 +121,7 @@ abstract class AbstractAggregationBuilder implements IAggregationHandler
             return $item;
         }
 
-        if (isset($item[ $key . '_' . self::RANGE_BOTTOM_NAME ]) && isset($item[ $key . "_" . self::RANGE_TOP_NAME ])) {
+        if (isset($item[ $key . '_' . self::RANGE_BOTTOM_NAME ],$item[ $key . "_" . self::RANGE_TOP_NAME ])) {
             return [
                 $key . '_' . self::RANGE_BOTTOM_NAME => $item[ $key . '_' . self::RANGE_BOTTOM_NAME ],
                 $key . "_" . self::RANGE_TOP_NAME => $item[ $key . '_' . self::RANGE_TOP_NAME ],

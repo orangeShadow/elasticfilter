@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 
-namespace OrangeShadow\ElasticFilter;
+namespace OrangeShadow\ElasticFilter\Url;
 
 
 class UrlHandler
@@ -10,48 +10,67 @@ class UrlHandler
     protected $charBetweenFieldAndValues = "-";
     protected $charBetweenValues = "-or-";
     protected $afterField = 'filter';
+    protected $hasSection = '';
+    protected $prefixField = '';
+
 
     /**
      * @param string $charBetweenFieldAndValues
      */
-    public function setCharBetweenFieldAndValues(string $charBetweenFieldAndValues): void
+    public function setCharBetweenFieldAndValues(string $charBetweenFieldAndValues): self
     {
         $this->charBetweenFieldAndValues = $charBetweenFieldAndValues;
+
+        return $this;
     }
 
     /**
      * @param string $charBetweenValues
      */
-    public function setCharBetweenValues(string $charBetweenValues): void
+    public function setCharBetweenValues(string $charBetweenValues): self
     {
         $this->charBetweenValues = $charBetweenValues;
+
+        return $this;
     }
 
     /**
      * @param string $afterField
      */
-    public function setAfterField(string $afterField): void
+    public function setAfterField(string $afterField): self
     {
         $this->afterField = $afterField;
+
+        return $this;
     }
 
     /**
-     * @param string $url
-     * @param array $fieldToNestedMapping = [] [slug => nested]
-     * @return array
+     * @param string $prefixField
      */
-    public function parse(string $url, array $fieldToNestedMapping = []): array
+    public function setPrefixField(string $prefixField): self
     {
-        $result = [];
-        preg_match('#^(.*?)/?' . $this->afterField . '/(.*?)(\?.*?)?$#', $url, $matches);
+        $this->prefixField = $prefixField;
+
+        return $this;
+    }
+
+
+    /**
+     * @param string $url
+     * @return UrlParserResult
+     */
+    public function parse(string $url): UrlParserResult
+    {
+        $result = new UrlParserResult();
+
+        preg_match('#^(.*?/)?' . $this->afterField . '/(.*?)(\?.*?)?$#', $url, $matches);
 
         if (!empty($matches[1])) {
-            $result['prefix'] = $matches[1];
+            $result->setPrefix($matches[1]);
         }
 
-
         if (!empty($matches[2])) {
-            $result['queryParams'] = $this->parseFilterPart($matches[2], $fieldToNestedMapping);
+            $result->setQueryParams($this->parseFilterPart($matches[2], $fieldToNestedMapping));
         }
 
         return $result;

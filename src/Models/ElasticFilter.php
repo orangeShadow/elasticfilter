@@ -47,6 +47,22 @@ class ElasticFilter extends Model implements IViewType
     }
 
     /**
+     * @return string
+     */
+    public function getSlug(): string
+    {
+        return $this->slug;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrlSlug(): string
+    {
+        return $this->url_slug;
+    }
+
+    /**
      * @param Builder $query
      * @param array $filter
      */

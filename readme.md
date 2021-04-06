@@ -97,15 +97,10 @@ OrangeShadow\ElasticFilter\Repositories\ElasticFilterRepository
         $filterList = $this->elasticFilterRepository->search([
             'uri'   => $uri,
             'index' => $this->config->getName()
-        ])->get();
-
-        $filterFields = [];
-
-        foreach ($filterList as $filter) {
-            $filterFields[] = $filter->slug;
-        }
-
-        return $filterFields;
+        ]);
+        
+        $slugHelper = new SlugHelper($filterList);
+        return $slugHelper->getSlugs();           
     }
 ```
 
@@ -115,14 +110,7 @@ OrangeShadow\ElasticFilter\Repositories\ElasticFilterRepository
 $urlHandler = new UrlHandler();
 $res = $urlHandler->parse('/catalog/vino/filter/color-beloe-or-rozovoe/country-avstraliya',['color'=>'offer.color']);
 
-return:
-[
-    "prefix" => "/catalog/vino",
-    "queryParams" => [
-        "offer.color" => ["beloe","rozovoe"]  
-        "country" => ["avstraliya"]
-    ]
-]
+return: UrlParserResult(getPrefix() , getQueryParams)
 
 $res = $urlHandler->build($res['queryParams'],['offer.color'=>'color']));
 
