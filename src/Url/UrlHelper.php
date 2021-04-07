@@ -24,6 +24,10 @@ class UrlHelper
         $urlPart = trim(trim($urlPart, '/'));
         $parts = explode('/', $urlPart);
 
+        if(empty($parts)) {
+            return [];
+        }
+
         foreach ($parts as $filterString) {
             preg_match('#^(\w+)' . $charBetweenFieldAndValues . '(.*?)$#', $filterString, $matches);
             $field = $urlToSlug[ $matches[1] ] ?? $matches[1];
