@@ -22,11 +22,12 @@ class UrlHelper
     ): array {
         $result = [];
         $urlPart = trim(trim($urlPart, '/'));
-        $parts = explode('/', $urlPart);
 
-        if(empty($parts)) {
+        if(empty($urlPart)) {
             return [];
         }
+
+        $parts = explode('/', $urlPart);
 
         foreach ($parts as $filterString) {
             preg_match('#^(\w+)' . $charBetweenFieldAndValues . '(.*?)$#', $filterString, $matches);
