@@ -18,7 +18,7 @@ use OrangeShadow\ElasticFilter\Models\ElasticFilter;
 class ElasticFilterRepository
 {
     protected $validation = [
-        'uri'   => 'required',
+        'category'   => 'required',
         'slug'  => 'required',
         'index' => 'required',
         'sort'  => 'numeric|nullable',

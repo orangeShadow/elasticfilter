@@ -4,38 +4,41 @@ declare(strict_types=1);
 
 namespace OrangeShadow\ElasticFilter\Url;
 
+use OrangeShadow\ElasticFilter\IndexConfig;
 use OrangeShadow\ElasticFilter\Models\ElasticFilter;
-use Ramsey\Collection\Collection;
+use OrangeShadow\ElasticFilter\Repositories\ElasticFilterRepository;
 
 /**
- * Class SlugHelper
+ * Class AggsFieldHelper
  * @package OrangeShadow\ElasticFilter\Url
  */
-class SlugHelper
+class AggsFieldHelper
 {
     protected $slugs = [];
     protected $slugToUrl = [];
     protected $urlToSlug = [];
 
     /**
-     * @var \Illuminate\Database\Eloquent\Collection [ElasticFilter]
+     * AggsFieldHelper constructor.
+     * @param string $category
+     * @param IndexConfig $config
      */
-    protected $collection;
-
-    /**
-     * SlugHelper constructor.
-     * @param \Illuminate\Database\Eloquent\Collection $collection
-     */
-    public function __construct(\Illuminate\Database\Eloquent\Collection $collection)
+    public function __construct(string $category, IndexConfig $config)
     {
+        $repo = new ElasticFilterRepository();
+        $collection = $repo->search([
+            'category' => $category,
+            'index'    => $config->getName()
+        ]);
+
         /**
          * @var ElasticFilter $item
          */
         foreach ($collection as $item) {
             $this->slugs[] = $item->getSlug();
             if (!empty($item->getUrlSlug())) {
-                $this->slugToUrl[ $item->getSlug() ] = $item->getUrlSlug();
-                $this->urlToSlug[ $item->getUrlSlug() ] = $item->getSlug();
+                $this->slugToUrl[ $item->getSlug() ] = $item->getUrlSlug() ?: [];
+                $this->urlToSlug[ $item->getUrlSlug() ] = $item->getSlug() ?: [];
             }
         }
     }

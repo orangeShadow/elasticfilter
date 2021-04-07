@@ -13,7 +13,7 @@ class CreateElasticFilterTable extends Migration
     {
         Schema::create('elastic_filters', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('uri');
+            $table->string('category')->comment('category or needed part of url');
             $table->string('index')->comment('Elastic Index name');
             $table->string('slug')->comment('Field`s name in elastic');
             $table->string('url_slug')->comment('Other url sug for SEO)')->nullable();
@@ -23,7 +23,7 @@ class CreateElasticFilterTable extends Migration
             $table->string('unit')->comment('Unit or phrase, after title or field')->nullable();
             $table->string('hint')->comment('Hint for filter on the screen')->nullable();
 
-            $table->unique(['uri','index','slug'], 'unique_uri_index_slug,');
+            $table->unique(['category','index','slug'], 'unique_category_index_slug');
         });
     }
 

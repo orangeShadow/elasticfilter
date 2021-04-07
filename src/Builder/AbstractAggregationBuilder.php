@@ -89,13 +89,22 @@ abstract class AbstractAggregationBuilder implements IAggregationHandler
     public function resultHandler(array $result): array
     {
         $data = [];
-        $result = $result['aggregations']['all_products'];;
+        $result = $result['aggregations']['all_products'];
         foreach ($result as $key => $item) {
             $res = $this->nestedResultWatch($key, $item);
 
             if (empty($res)) {
                 continue;
             }
+
+            if (preg_match('/_(' . implode('|', [self::RANGE_TOP_NAME, self::RANGE_BOTTOM_NAME]) . ')$/',$key)) {
+
+                $newKey = preg_replace('/_(' . implode('|', [self::RANGE_TOP_NAME, self::RANGE_BOTTOM_NAME]) . ')$/','',$key);
+                $data[$newKey]= $data[$newKey]??[];
+                $data[$newKey][$key] =$res;
+                continue;
+            }
+
             $data[ $key ] = $res;
         }
 
@@ -121,10 +130,10 @@ abstract class AbstractAggregationBuilder implements IAggregationHandler
             return $item;
         }
 
-        if (isset($item[ $key . '_' . self::RANGE_BOTTOM_NAME ],$item[ $key . "_" . self::RANGE_TOP_NAME ])) {
+        if (isset($item[ $key . '_' . self::RANGE_BOTTOM_NAME ], $item[ $key . "_" . self::RANGE_TOP_NAME ])) {
             return [
                 $key . '_' . self::RANGE_BOTTOM_NAME => $item[ $key . '_' . self::RANGE_BOTTOM_NAME ],
-                $key . "_" . self::RANGE_TOP_NAME => $item[ $key . '_' . self::RANGE_TOP_NAME ],
+                $key . "_" . self::RANGE_TOP_NAME    => $item[ $key . '_' . self::RANGE_TOP_NAME ],
             ];
         }
 

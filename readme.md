@@ -70,50 +70,27 @@ ElasticManager::count($searchProperty);  //to get element`s count
 
 ElasticManager::aggregation($queryParams,$filterFields) //filterFields - fields for aggregation
 ```
-
-Where $filterFields you must set manual
+### Examples
 
 For example you can use OrangeShadow\ElasticFilter\Models\ElasticFilter model and
 OrangeShadow\ElasticFilter\Repositories\ElasticFilterRepository
 
 1. Run migrations 
 2. Enter data to ElasticFilter table
-
+3. Add next code to your roting
 ```
-    public function __construct() 
-    {
-        $this->elasticFilterRepository = new ElasticFilterRepository();
-        $this->config = new InexConfig('config_file_name');
-    }
+use \OrangeShadow\ElasticFilter as EF;
+
+Route::get('/aggs/{category}/filter/{queryParts}', function (string $category, string $queryParts) {
+    // Get all fields for aggregation by category or sub url path  
+    $aggsFieldHelper = new EF\Url\AggsFieldHelper($category, EF\ElasticManager::getConfig());
     
-    ...
+    //ParseQuery by url it is for seo, you can use without wthis if you want
+    //ex:queryParts = color-beloe-or-rozovoe/country-avstraliya  
+    $queryParams = EF\Url\UrlHelper::parseFilterPart($queryParts, $aggsFieldHelper->getUrlToSlug());
     
-    /**
-     * @param string $url
-     * @return array
-     */
-    protected function getFieldsByUrl(string $url): array
-    {
-        $filterList = $this->elasticFilterRepository->search([
-            'uri'   => $uri,
-            'index' => $this->config->getName()
-        ]);
-        
-        $slugHelper = new SlugHelper($filterList);
-        return $slugHelper->getSlugs();           
-    }
-```
-
-### Url handler object
-
-```
-$urlHandler = new UrlHandler();
-$res = $urlHandler->parse('/catalog/vino/filter/color-beloe-or-rozovoe/country-avstraliya',['color'=>'offer.color']);
-
-return: UrlParserResult(getPrefix() , getQueryParams)
-
-$res = $urlHandler->build($res['queryParams'],['offer.color'=>'color']));
-
-return: "filter/color-beloe-or-rozovoe/country-avstraliya"
-```
- 
+    //Get aggregated fields from elasticsearch
+    $res = EF\ElasticManager::aggregation($queryParams, $aggsFieldHelper->getSlugs());
+    //exp $res = ['color'=>['White||white', 'Red||red'],strength=>['strength_from'=>3,'strength_to'=>12]]  
+})->where(['section' => '.*', 'queryParts' => '.*?']);
+```   

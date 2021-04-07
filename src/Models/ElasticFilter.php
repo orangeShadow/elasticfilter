@@ -16,7 +16,7 @@ class ElasticFilter extends Model implements IViewType
      * @var string[]
      */
     protected $fillable = [
-        'uri',
+        'category',
         'index',
         'slug',
         'title',
@@ -57,7 +57,7 @@ class ElasticFilter extends Model implements IViewType
     /**
      * @return string
      */
-    public function getUrlSlug(): string
+    public function getUrlSlug(): ?string
     {
         return $this->url_slug;
     }
@@ -72,8 +72,8 @@ class ElasticFilter extends Model implements IViewType
             return $query->where('index', $filter['index']);
         });
 
-        $query->when(isset($filter['uri']), function (Builder $query) use ($filter) {
-            return $query->where('uri', $filter['uri']);
+        $query->when(isset($filter['category']), function (Builder $query) use ($filter) {
+            return $query->where('category', $filter['category']);
         });
 
         $query->when(isset($filter['slug']), function (Builder $query) use ($filter) {
