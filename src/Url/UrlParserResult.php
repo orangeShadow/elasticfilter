@@ -7,9 +7,8 @@ namespace OrangeShadow\ElasticFilter\Url;
 
 class UrlParserResult
 {
-    protected $prefix;
-    protected $section;
-    protected $queryParams;
+    protected $prefix='';
+    protected $queryParams=[];
 
     /**
      * @return mixed
@@ -25,24 +24,6 @@ class UrlParserResult
     public function setPrefix($prefix): self
     {
         $this->prefix = $prefix;
-
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getSection()
-    {
-        return $this->section;
-    }
-
-    /**
-     * @param mixed $section
-     */
-    public function setSection($section): self
-    {
-        $this->section = $section;
 
         return $this;
     }

@@ -70,7 +70,7 @@ class UrlHandler
         }
 
         if (!empty($matches[2])) {
-            $result->setQueryParams($this->parseFilterPart($matches[2], $fieldToNestedMapping));
+            $result->setQueryParams($this->parseFilterPart($matches[2]));
         }
 
         return $result;
