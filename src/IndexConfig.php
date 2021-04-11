@@ -10,19 +10,6 @@ use OrangeShadow\ElasticFilter\Exceptions\MappingNotFoundException;
 
 class IndexConfig
 {
-    private const DEFAULT_SETTINGS = [
-        'analysis' => [
-            'normalizer' => [
-                'keyword_lowercase' => [
-                    'type'   => 'custom',
-                    'filter' => [
-                        'lowercase'
-                    ]
-                ]
-            ]
-        ]
-    ];
-
     /**
      * @var string
      */
@@ -86,8 +73,8 @@ class IndexConfig
         $this->mapping = Arr::get($config, 'mapping', []);
 
         $this->prepareMappingByType();
-
-        $settings = array_merge_recursive(Arr::get($config, 'settings', []), self::DEFAULT_SETTINGS);
+        $defaultSettings = Arr::get(config('elastic_filter'),'settings');
+        $settings = array_merge_recursive(Arr::get($config, 'settings', []), $defaultSettings);
         $this->settings = $settings;
         $this->className = Arr::get($config, 'className');
 

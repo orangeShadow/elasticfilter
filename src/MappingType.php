@@ -52,6 +52,13 @@ class MappingType
         'normalizer' => 'keyword_lowercase'
     ];
 
+    public const FULL_TEXT = [
+        "type"                  => "text",
+        "analyzer"              => "all_text",
+        "search_analyzer"       => "all_text",
+        "search_quote_analyzer" => "all_text"
+    ];
+
     public const INT = [
         'type' => 'integer'
     ];

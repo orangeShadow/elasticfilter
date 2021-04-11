@@ -1,8 +1,11 @@
 <?php
+use \OrangeShadow\ElasticFilter\MappingType;
+
 return [
     'name'        => 'catalog',
     'mapping'     => [
-        'title' => \OrangeShadow\ElasticFilter\MappingType::KEYWORD
+        'tag' => MappingType::KEYWORD,
+        'description' => MappingType::FULL_TEXT,
     ],
     'settings'    => [],
     'primary_key' => 'id',

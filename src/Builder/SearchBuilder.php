@@ -112,6 +112,8 @@ class SearchBuilder extends AbstractSearchBuilder
     protected function buildQueryByType(array $type, string $key, $value, ?string $range = null): ?BuilderInterface
     {
         switch ($type) {
+            case MappingType::FULL_TEXT:
+                return new Query\FullText\MatchQuery($key, $value);
             case MappingType::BOOL:
             case MappingType::KEYWORD:
             case MappingType::KEYWORD_LOWERCASE :
@@ -121,6 +123,7 @@ class SearchBuilder extends AbstractSearchBuilder
 
                 return new Query\TermLevel\TermQuery($key, $value);
             case MappingType::INT:
+            case MappingType::SHORT:
                 if ($range) {
                     return new Query\TermLevel\RangeQuery($key, [$range => (int)$value]);
                 }
