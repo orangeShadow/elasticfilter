@@ -316,9 +316,9 @@ class ElasticManager
 
     /**
      * @param SearchProperty $searchProperty
-     * @return mixed|null
+     * @return array
      */
-    public function search(SearchProperty $searchProperty)
+    public function search(SearchProperty $searchProperty):array
     {
         $body = [];
 
@@ -339,7 +339,7 @@ class ElasticManager
 
 
         if (empty($result['hits']['hits'])) {
-            return null;
+            return [];
         }
 
         return $result['hits']['hits'];
