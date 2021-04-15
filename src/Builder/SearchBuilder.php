@@ -128,7 +128,7 @@ class SearchBuilder extends AbstractSearchBuilder
                     return new Query\TermLevel\RangeQuery($key, [$range => (int)$value]);
                 }
 
-                return new Query\TermLevel\TermQuery($key, (int)$value);
+                return new Query\TermLevel\TermsQuery($key, $value);
             case MappingType::FLOAT:
                 if (!empty($range)) {
                     return new Query\TermLevel\RangeQuery($key, [$range => (float)$value]);

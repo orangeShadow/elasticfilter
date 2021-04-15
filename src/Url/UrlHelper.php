@@ -31,9 +31,14 @@ class UrlHelper
 
         foreach ($parts as $filterString) {
             preg_match('#^(\w+)' . $charBetweenFieldAndValues . '(.*?)$#', $filterString, $matches);
-            $field = $urlToSlug[ $matches[1] ] ?? $matches[1];
-            $values = $matches[2];
-            $result[ $field ] = explode($charBetweenValues, $values);
+            if (preg_match('/^(.*?)(_from|_to)$/',$matches[1],$subMatches) !== false
+                && count($subMatches) === 3 ) {
+                $field =  $urlToSlug[ $subMatches[1] ].$subMatches[2];
+                $result[ $field ] = (int)$matches[2];
+            } else {
+                $field = $urlToSlug[ $matches[1] ] ?? $matches[1];
+                $result[ $field ] = explode($charBetweenValues, $matches[2]);
+            }
         }
 
         return $result;
