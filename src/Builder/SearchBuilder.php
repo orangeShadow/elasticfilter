@@ -126,8 +126,9 @@ class SearchBuilder extends AbstractSearchBuilder
             case MappingType::SHORT:
                 if ($range) {
                     return new Query\TermLevel\RangeQuery($key, [$range => (int)$value]);
+                } elseif (!is_array($value)) {
+                    return new Query\TermLevel\TermQuery($key, $value);
                 }
-
                 return new Query\TermLevel\TermsQuery($key, $value);
             case MappingType::FLOAT:
                 if (!empty($range)) {
