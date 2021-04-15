@@ -23,16 +23,6 @@ class ElasticFilter extends Model
         'hint'
     ];
 
-    /**
-     * @param string $type
-     * @return $this
-     */
-    public function setTypeAttribute(string $type): self
-    {
-        $this->type = $type;
-
-        return $this;
-    }
 
     /**
      * @return string
