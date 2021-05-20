@@ -55,7 +55,7 @@ class ElasticDataIndex extends Command
             foreach ($indexConfig->getClassName()::getDataForElastic() as $item) {
                 $elasticManager->addElement($item[ $indexConfig->getPrimaryKey() ], $item);
             }
-            $indexConfig->getName($alias);
+            $indexConfig->setName($alias);
             $elasticManager->setAlias($nexIndex);
         } catch (ElasticFilterException $e) {
             $this->error($e->getMessage() . ', file:' . $e->getFile() . ', line:' . $e->getLine());
