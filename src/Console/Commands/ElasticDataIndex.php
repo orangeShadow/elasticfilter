@@ -48,13 +48,15 @@ class ElasticDataIndex extends Command
         $configPath = $this->argument('configPath');
         try {
             $indexConfig = new IndexConfig($configPath);
+            $alias = $indexConfig->getName();
             $elasticManager = new ElasticManager($indexConfig);
             $nexIndex = $elasticManager->createIndex();
-            $elasticManager->setAlias($nexIndex);
+            $indexConfig->setName($nexIndex);
             foreach ($indexConfig->getClassName()::getDataForElastic() as $item) {
                 $elasticManager->addElement($item[ $indexConfig->getPrimaryKey() ], $item);
             }
-
+            $indexConfig->getName($alias);
+            $elasticManager->setAlias($nexIndex);
         } catch (ElasticFilterException $e) {
             $this->error($e->getMessage() . ', file:' . $e->getFile() . ', line:' . $e->getLine());
 
