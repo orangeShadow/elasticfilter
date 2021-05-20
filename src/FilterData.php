@@ -41,7 +41,7 @@ class FilterData implements JsonSerializable
             $slug = Str::slug($value, '_', 'ru');
         }
         $this->slug = $slug;
-        $this->computed = implode('||', [$value, $slug]);
+        $this->computed = implode('||', [$value, Str::lower($slug)]);
         $this->otherData = $otherData;
     }
 

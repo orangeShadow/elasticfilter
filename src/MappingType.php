@@ -33,8 +33,7 @@ class MappingType
                 'normalizer' => 'keyword_lowercase'
             ],
             'computed' => [
-                'type'       => 'keyword',
-                'normalizer' => 'keyword_lowercase'
+                'type'       => 'keyword'
             ]
         ]
     ];
