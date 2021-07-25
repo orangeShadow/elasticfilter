@@ -347,7 +347,7 @@ class ElasticManager
         ];
 
         if ($this->isLogging()) {
-            Log::info('ElasticManager::search', $param);
+            Log::info('ElasticManager::search: '.json_encode($param));
         }
 
         $result = $this->client->search($param);
@@ -380,7 +380,7 @@ class ElasticManager
         ];
 
         if ($this->isLogging()) {
-            Log::info('ElasticManager::aggregation', $param);
+            Log::info('ElasticManager::aggregation: '. json_encode($param));
         }
 
         $result = $this->client->search($param);
@@ -407,7 +407,7 @@ class ElasticManager
         ];
 
         if ($this->isLogging()) {
-            Log::info('ElasticManager::count', $param);
+            Log::info('ElasticManager::count: '.json_encode($param));
         }
 
         $result = $this->client->count($param);
