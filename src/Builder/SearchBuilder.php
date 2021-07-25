@@ -125,14 +125,14 @@ class SearchBuilder extends AbstractSearchBuilder
             case MappingType::INT:
             case MappingType::SHORT:
                 if ($range) {
-                    return new Query\TermLevel\RangeQuery($key, [$range => (int)$value]);
+                    return $this->rangeField($key, $range, (int)$value);
                 } elseif (!is_array($value)) {
                     return new Query\TermLevel\TermQuery($key, $value);
                 }
                 return new Query\TermLevel\TermsQuery($key, $value);
             case MappingType::FLOAT:
-                if (!empty($range)) {
-                    return new Query\TermLevel\RangeQuery($key, [$range => (float)$value]);
+                if ($range) {
+                    return $this->rangeField($key, $range, (float)$value);
                 }
 
                 return new Query\TermLevel\TermQuery($key, (float)$value);
@@ -145,6 +145,21 @@ class SearchBuilder extends AbstractSearchBuilder
         }
 
         return null;
+    }
+
+    /**
+     *
+     **/
+    protected function rangeField(string $key, string $range , $value) {
+        if (isset($this->rangeFieldQuery[$key])) {
+            $rangeArr = $this->rangeFieldQuery[$key]->getParameters();
+            $rangeArr[$range] = $value;
+            $this->rangeFieldQuery[$key]->setParameters($rangeArr);
+            return null;
+        }
+        $query = new Query\TermLevel\RangeQuery($key, [$range =>$value]);
+        $this->rangeFieldQuery[$key] = $query;
+        return $query;
     }
 
     /**
@@ -167,11 +182,18 @@ class SearchBuilder extends AbstractSearchBuilder
         ?string $range = null
     ): ?BuilderInterface {
         $key = array_shift($keyArr);
+
         if (empty($key)) {
             $query = $this->buildQueryByType($lastType, $parentKey, $value, $range);
+
+            if(!$query) {
+                return null;
+            }
+
             $keyArr = explode('.', $parentKey);
             array_pop($keyArr);
             $nestedKey = implode('.', $keyArr);
+
             if (isset($this->nestedFieldQuery[ $nestedKey ])) {
                 $this->nestedFieldQuery[ $nestedKey ]->add($query,$boolType);
                 return null;

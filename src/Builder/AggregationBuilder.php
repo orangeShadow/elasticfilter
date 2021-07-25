@@ -38,8 +38,8 @@ class AggregationBuilder extends AbstractAggregationBuilder
                         $curQueryParams[ $fieldKey . "_" . self::RANGE_BOTTOM_NAME ]
                     );
                 }
-
-                $filterAggs = new FilterAggregation($key, $this->searchBuilder->getBoolQuery($curQueryParams));
+                $searchBuilder = new SearchBuilder($this->config);
+                $filterAggs = new FilterAggregation($key, $searchBuilder->getBoolQuery($curQueryParams));
                 $filterAggs->addAggregation($agg);
                 $search->addAggregation($filterAggs);
             }

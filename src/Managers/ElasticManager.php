@@ -79,7 +79,7 @@ class ElasticManager
             $aggregationBuilderClassName = \config(self::CONFIG_FILE . '.aggregationBuilder');
             $this->aggregationBuilder = new $aggregationBuilderClassName($config, $this->searchBuilder);
         } else {
-            $this->aggregationBuilder = new AggregationBuilder($config, $this->searchBuilder);
+            $this->aggregationBuilder = new AggregationBuilder($config);
         }
     }
 

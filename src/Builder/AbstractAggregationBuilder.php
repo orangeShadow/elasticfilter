@@ -55,12 +55,10 @@ abstract class AbstractAggregationBuilder implements IAggregationHandler
     /**
      * AbstractAggregationBuilder constructor.
      * @param IndexConfig $config
-     * @param AbstractSearchBuilder $searchBuilder
      */
-    public function __construct(IndexConfig $config, AbstractSearchBuilder $searchBuilder)
+    public function __construct(IndexConfig $config)
     {
         $this->config = $config;
-        $this->searchBuilder = $searchBuilder;
         $this->elasticFilterRepository = new ElasticFilterRepository();
     }
 
