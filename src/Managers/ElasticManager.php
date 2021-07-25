@@ -14,11 +14,19 @@ use OrangeShadow\ElasticFilter\Contracts\IAggregationHandler;
 use OrangeShadow\ElasticFilter\Exceptions\CreateIndexException;
 use OrangeShadow\ElasticFilter\IndexConfig;
 use OrangeShadow\ElasticFilter\SearchProperty;
-
+use Illuminate\Support\Facades\Log;
 
 class ElasticManager
 {
+    /**
+     * @var string
+     */
     private const CONFIG_FILE = 'elastic_filter';
+
+    /**
+     * @var bool
+     */
+    private $logging = false;
 
     /**
      * @var IndexConfig
@@ -318,7 +326,7 @@ class ElasticManager
      * @param SearchProperty $searchProperty
      * @return array
      */
-    public function search(SearchProperty $searchProperty):array
+    public function search(SearchProperty $searchProperty): array
     {
         $body = [];
 
@@ -332,11 +340,17 @@ class ElasticManager
         $body['_source'] = $searchProperty->getSource();
 
         $body = array_merge($body, $this->searchBuilder->build($searchProperty->getQueryParams()));
-        $result = $this->client->search([
+
+        $param = [
             'index' => $this->config->getName(),
             'body'  => $body
-        ]);
+        ];
 
+        if ($this->isLogging()) {
+            Log::info('ElasticManager::search', $param);
+        }
+
+        $result = $this->client->search($param);
 
         if (empty($result['hits']['hits'])) {
             return [];
@@ -360,10 +374,16 @@ class ElasticManager
             $this->aggregationBuilder->build($queryParams, $filterFields)
         );
 
-        $result = $this->client->search([
+        $param = [
             'index' => $this->getConfig()->getName(),
             'body'  => $body
-        ]);
+        ];
+
+        if ($this->isLogging()) {
+            Log::info('ElasticManager::aggregation', $param);
+        }
+
+        $result = $this->client->search($param);
 
         if (!is_null($handler)) {
             return $handler->resultHandler($result);
@@ -374,7 +394,7 @@ class ElasticManager
     }
 
     /**
-     * Получить кол-во элементов
+     * Get element count
      *
      * @param SearchProperty $searchProperty
      * @return int
@@ -386,6 +406,10 @@ class ElasticManager
             'body'  => $this->searchBuilder->build($searchProperty->getQueryParams())
         ];
 
+        if ($this->isLogging()) {
+            Log::info('ElasticManager::count', $param);
+        }
+
         $result = $this->client->count($param);
 
         if (empty($result['count'])) {
@@ -394,4 +418,24 @@ class ElasticManager
 
         return $result['count'];
     }
+
+    /**
+     * @return bool
+     */
+    public function isLogging(): bool
+    {
+        return $this->logging;
+    }
+
+    /**
+     * @param bool $logging
+     */
+    public function setLogging(bool $logging): self
+    {
+        $this->logging = $logging;
+
+        return $this;
+    }
+
+
 }
