@@ -155,7 +155,7 @@ class SearchBuilder extends AbstractSearchBuilder
             $rangeArr = $this->rangeFieldQuery[$key]->getParameters();
             $rangeArr[$range] = $value;
             $this->rangeFieldQuery[$key]->setParameters($rangeArr);
-            return null;
+            return $this->rangeFieldQuery[$key];
         }
         $query = new Query\TermLevel\RangeQuery($key, [$range =>$value]);
         $this->rangeFieldQuery[$key] = $query;
