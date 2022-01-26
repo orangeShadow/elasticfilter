@@ -26,7 +26,8 @@ class MappingType
         'type'       => 'nested',
         'properties' => [
             'value'    => [
-                'type' => 'keyword_lowercase'
+                'type' => 'keyword',
+                'normalizer' => 'keyword_lowercase'
             ],
             'slug'     => [
                 'type'       => 'keyword',
