@@ -271,13 +271,11 @@ class ElasticManager
      */
     public function updateElement(string $id, array $source): void
     {
-        try {
-            $this->deleteElement($id);
-        } catch (\Exception $e) {
-            //Ничего не делаем, может падать ошибка если нет в индексе
-        } finally {
-            $this->addElement($id, $source);
-        }
+        $this->client->update([
+          'index' => $this->config->getName(),
+          'id'    => $id,
+          'body'  => ['doc'=>$source]
+        ]);
     }
 
     /**
