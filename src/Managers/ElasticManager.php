@@ -168,7 +168,7 @@ class ElasticManager
 
             $this->client->indices()->create($params);
         } catch (\Throwable $e) {
-            $this->deleteIndexByName($newIndexName);
+            $this->deleteIndexByName(null, $newIndexName);
             throw new CreateIndexException($e);
         }
 
