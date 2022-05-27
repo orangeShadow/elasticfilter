@@ -22,8 +22,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void updateElement(string $id, array $source)
  * @method static void deleteElement(string $id):
  * @method static array|null getElement(string $id)
- *
- *
+ * @method static void bulk(array $items)
  */
 class ElasticManager extends Facade
 {

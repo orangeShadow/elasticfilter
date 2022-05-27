@@ -321,6 +321,15 @@ class ElasticManager
     }
 
     /**
+     * @param array $items
+     * @return void
+     */
+    public function bulk(array $items): void
+    {
+        $this->client->bulk($items);
+    }
+
+    /**
      * @param SearchProperty $searchProperty
      * @return array
      */
