@@ -35,6 +35,9 @@ class MappingType
             ],
             'computed' => [
                 'type'       => 'keyword'
+            ],
+            'number' => [
+                'type'       => 'integer'
             ]
         ]
     ];
